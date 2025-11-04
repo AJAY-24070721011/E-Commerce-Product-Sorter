@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX 100
+
+typedef struct {
+    char name[50];
+    float price;
+    float rating;
+    char category[30];
+} Product;
+
+// Merge function for merge sort
+void merge(Product arr[], int left, int mid, int right, int choice, int ascending) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    Product L[n1], R[n2];
+
+    for (int i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (int j = 0; j < n2; j++)
+        R[j] = arr[mid + 1 + j];
+
+    int i = 0, j = 0, k = left;
+
+    while (i < n1 && j < n2) {
+        int compare = 0;
+
+        // Sorting choice
+        if (choice == 1)
+            compare = (L[i].price < R[j].price);
+        else if (choice == 2)
+            compare = (L[i].rating < R[j].rating);
+        else if (choice == 3)
+            compare = (strcmp(L[i].category, R[j].category) < 0);
+
+        if ((ascending && compare) || (!ascending && !compare))
+            arr[k++] = L[i++];
+        else
+            arr[k++] = R[j++];
+    }
+
+    while (i < n1)
+        arr[k++] = L[i++];
+    while (j < n2)
+        arr[k++] = R[j++];
+}
+
+// Recursive Merge Sort
+void mergeSort(Product arr[], int left, int right, int choice, int ascending) {
+    if (left < right) {
+        int mid = (left + right) / 2;
+        mergeSort(arr, left, mid, choice, ascending);
+        mergeSort(arr, mid + 1, right, choice, ascending);
+        merge(arr, left, mid, right, choice, ascending);
+    }
+}
+
+// Display products
+void displayProducts(Product p[], int n) {
+    printf("\n%-20s %-10s %-10s %-15s\n", "Name", "Price", "Rating", "Category");
+    printf("-------------------------------------------------------------\n");
+    for (int i = 0; i < n; i++)
+        printf("%-20s %-10.2f %-10.1f %-15s\n", p[i].name, p[i].price, p[i].rating, p[i].category);
+}
+
+int main() {
+    Product products[MAX];
+    int n, choice, asc, ch;
+
+    printf("Enter number of products: ");
+    scanf("%d", &n);
+    getchar(); // consume newline
+
+    for (int i = 0; i < n; i++) {
+        printf("\nProduct %d\n", i + 1);
+        printf("Name: "); fgets(products[i].name, 50, stdin); products[i].name[strcspn(products[i].name, "\n")] = 0;
+        printf("Price: "); scanf("%f", &products[i].price);
+        printf("Rating: "); scanf("%f", &products[i].rating);
+        getchar(); // consume newline
+        printf("Category: "); fgets(products[i].category, 30, stdin); products[i].category[strcspn(products[i].category, "\n")] = 0;
+    }
+
+    // Menu loop
+    do {
+        printf("\n==== PRODUCT SORTING MENU ====\n");
+        printf("1. Sort by Price\n");
+        printf("2. Sort by Rating\n");
+        printf("3. Sort by Category\n");
+        printf("4. Display Products\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+            case 2:
+                printf("1. Ascending\n2. Descending\nEnter choice: ");
+                scanf("%d", &asc);
+                asc = (asc == 1);
+                mergeSort(products, 0, n - 1, choice, asc);
+                printf("\nProducts sorted successfully!\n");
+                break;
+
+            case 3:
+                mergeSort(products, 0, n - 1, choice, 1);
+                printf("\nProducts sorted by Category (Ascending)!\n");
+                break;
+
+            case 4:
+                displayProducts(products, n);
+                break;
+
+            case 5:
+                printf("\nExiting program...\n");
+                break;
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+    } while (choice != 5);
+    return 0;
+}
